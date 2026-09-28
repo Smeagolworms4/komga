@@ -78,6 +78,25 @@ object InterfacesData {
 
     db.readProgressDao.save(ReadProgress("B1", "U1", 3, true, readDate = date.plusDays(1), createdDate = date))
     db.readProgressDao.save(ReadProgress("B2", "U1", 3, false, readDate = date.plusDays(2), createdDate = date))
+    fixDates(db, "SERIES", listOf("S1", "S2", "S3"), 2, 6)
+    fixDates(db, "BOOK", listOf("B1", "B2", "B3", "B4", "B5", "B6"), 3, 4)
+  }
+
+  /**
+   * fixed, distinct dates (the n-th id is the most recent) instead of CURRENT_TIMESTAMP (set by the database, to the second):
+   * "latest added / updated" sorts do not depend on a second boundary crossed while populating
+   */
+  private fun fixDates(
+    db: OracleDb,
+    table: String,
+    ids: List<String>,
+    createdMonth: Int,
+    modifiedMonth: Int,
+  ) {
+    for (id in ids) {
+      val day = id.substring(1)
+      db.dsl.execute("update $table set CREATED_DATE = '2020-0$createdMonth-0$day 10:00:00', LAST_MODIFIED_DATE = '2020-0$modifiedMonth-0$day 10:00:00' where ID = '$id'")
+    }
   }
 
   private lateinit var currentDb: OracleDb
@@ -191,6 +210,7 @@ object InterfacesData {
     )
     db.bookMetadataDao.insert(BookMetadata(title = "real", number = "7", numberSort = 7F, bookId = "B7", createdDate = date))
     db.bookMetadataDao.insert(BookMetadata(title = "real epub", number = "8", numberSort = 8F, bookId = "B8", createdDate = date))
+    fixDates(db, "BOOK", listOf("B7", "B8"), 3, 4)
   }
 
   /** populates [db] (must be called inside a case) */

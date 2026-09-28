@@ -60,6 +60,8 @@ class ReadListDaoOracleTest : OracleTest() {
         dao.insert(ReadList("zebra", id = "RL5", bookIds = sortedMapOf(0 to "B11")))
         dao.insert(ReadList("Ångström list", id = "RL6", bookIds = sortedMapOf(0 to "B10", 1 to "B1")))
         dao.insert(ReadList("reading order 2", id = "RL7"))
+        // fixed dates (CURRENT_TIMESTAMP, to the second): "sorted by dates" does not depend on a second boundary between two cases
+        db.dsl.execute("update READLIST set CREATED_DATE = '2021-01-01 00:00:00', LAST_MODIFIED_DATE = '2021-01-01 00:00:00' where ID in ('RL4', 'RL5', 'RL6', 'RL7')")
         dao.count()
       }
       case("stored values") { db.rawQuery("select ID, NAME, SUMMARY, ORDERED, BOOK_COUNT from READLIST order by ID") }

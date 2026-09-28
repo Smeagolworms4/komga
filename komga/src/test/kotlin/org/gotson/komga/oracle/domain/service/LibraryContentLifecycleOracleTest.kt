@@ -103,7 +103,8 @@ class LibraryContentLifecycleOracleTest : OracleTest() {
         },
         db.sidecarDao.findAll().map { listOf(it.url, it.parentUrl, it.lastModifiedTime) }.sortedBy { it[0].toString() },
         graph.takeTasks().map { it.substringBefore("(") }.sorted(),
-        graph.takeEvents().map { it.javaClass.simpleName },
+        // sorted: series and books are processed in raw readdir order, which depends on the file system (ext4 hash seed)
+        graph.takeEvents().map { it.javaClass.simpleName }.sorted(),
         lib().unavailableDate != null,
       )
     }

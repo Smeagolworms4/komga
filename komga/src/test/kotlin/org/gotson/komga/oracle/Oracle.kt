@@ -190,14 +190,14 @@ object Canon {
    * Neutralises, in a canonical value, what the code under test generates at run time:
    * - a string that is a TSID (13 Crockford base32 characters, `TsidCreator.getTsid256()`) becomes `"@id:<n>"`,
    *   n numbering the distinct ids in order of first appearance (the same id keeps the same number);
-   * - a `{"@time": ...}` starting with a date within one day of today (`LocalDateTime.now()`, in UTC or local time)
-   *   becomes `{"@time": "@now"}`.
+   * - a `{"@time": ...}` starting with a date within two days of today (`LocalDateTime.now()`, in UTC or local time)
+   *   becomes `{"@time": "@now"}` (two days: `LocalDate.now(UTC).minusDays(1)` can be two days back in local time).
    * Map keys are kept. Cases must use fixed dates far from today for the values they set themselves.
    */
   fun stable(v: Any?): Any? {
     val ids = linkedMapOf<String, String>()
     val today = java.time.LocalDate.now()
-    val near = listOf(today.minusDays(1), today, today.plusDays(1)).map { it.toString() }.toSet()
+    val near = listOf(today.minusDays(2), today.minusDays(1), today, today.plusDays(1), today.plusDays(2)).map { it.toString() }.toSet()
 
     fun walk(x: Any?): Any? =
       when (x) {

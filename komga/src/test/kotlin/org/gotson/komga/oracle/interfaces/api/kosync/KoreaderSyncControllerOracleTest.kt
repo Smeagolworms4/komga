@@ -35,12 +35,19 @@ class KoreaderSyncControllerOracleTest : OracleTest() {
     h: String,
   ) = db.bookDao.update(db.bookDao.findByIdOrNull(bookId)!!.copy(fileHashKoreader = h))
 
+  /**
+   * the progress saved just before is backdated: markProgression requires a strictly later date and `now()` only has
+   * millisecond precision in JS (two updates within the same millisecond would be "older")
+   */
   private fun update(
     document: String,
     progress: String,
     percentage: Float = 0.5F,
     principal: KomgaPrincipal = admin,
-  ) = attempt { controller.updateProgress(principal, DocumentProgressDto(document, percentage, progress, "KOReader dev", "dev-id")) }
+  ) = attempt {
+    db.dsl.execute("update READ_PROGRESS set READ_DATE = '2020-01-01 00:00:00' where READ_DATE >= '2025'")
+    controller.updateProgress(principal, DocumentProgressDto(document, percentage, progress, "KOReader dev", "dev-id"))
+  }
 
   private fun progress(bookId: String) = stable(db.readProgressDao.findByBookIdAndUserIdOrNull(bookId, "U1"))
 

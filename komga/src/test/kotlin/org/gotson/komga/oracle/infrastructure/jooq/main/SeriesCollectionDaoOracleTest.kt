@@ -61,6 +61,8 @@ class SeriesCollectionDaoOracleTest : OracleTest() {
         dao.insert(SeriesCollection("zebra", seriesIds = listOf("S6"), id = "C5"))
         dao.insert(SeriesCollection("Ångström collection", seriesIds = listOf("S4", "S1"), id = "C6"))
         dao.insert(SeriesCollection("heroes 2", id = "C7"))
+        // fixed dates (CURRENT_TIMESTAMP, to the second): "sorted by dates" does not depend on a second boundary between two cases
+        db.dsl.execute("update COLLECTION set CREATED_DATE = '2021-01-01 00:00:00', LAST_MODIFIED_DATE = '2021-01-01 00:00:00' where ID in ('C4', 'C5', 'C6', 'C7')")
         dao.count()
       }
       case("stored values") { db.rawQuery("select ID, NAME, ORDERED, SERIES_COUNT from COLLECTION order by ID") }

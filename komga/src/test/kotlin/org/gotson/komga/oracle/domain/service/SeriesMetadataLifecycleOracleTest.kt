@@ -166,6 +166,11 @@ class SeriesMetadataLifecycleOracleTest : OracleTest() {
         db.bookMetadataDao.update(
           db.bookMetadataDao.findById("B2").copy(summary = "second", releaseDate = LocalDate.of(2005, 6, 1), authors = listOf(Author("A", "writer"), Author("B", "penciller")), tags = setOf("y")),
         )
+        // findAllByIds groups on every BOOK_METADATA column (CREATED_DATE, LAST_MODIFIED_DATE first): fixed dates
+        // for a deterministic B1, B2 order (LocalDateTime.now() has millisecond precision in JS, ties are possible)
+        db.dsl.execute("update BOOK_METADATA set CREATED_DATE = '2020-01-02 03:04:05', LAST_MODIFIED_DATE = '2020-01-02 03:04:05'")
+        db.dsl.execute("update BOOK_METADATA set LAST_MODIFIED_DATE = '2020-01-02 03:04:06' where BOOK_ID = 'B1'")
+        db.dsl.execute("update BOOK_METADATA set LAST_MODIFIED_DATE = '2020-01-02 03:04:07' where BOOK_ID = 'B2'")
         lifecycle.aggregateMetadata(s("S1"))
         stable(listOf(db.bookMetadataAggregationDao.findById("S1"), graph.takeEvents().map { it.javaClass.simpleName }))
       }
