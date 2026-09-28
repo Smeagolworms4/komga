@@ -4,7 +4,7 @@ name: KomgaJS oracles
 # komga/src/test/kotlin/org/gotson/komga/oracle/ call the real Komga functions and record their results as JSON
 # fixtures. KomgaJS commits these fixtures (test/unit/fixtures/) and replays every case on the ported functions.
 # This workflow runs only the oracle tests and checks that the fixtures they produce are identical to the ones
-# committed on the KomgaJS branch (default: unit-tests).
+# committed on the KomgaJS branch (default: main).
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
       komga_js_ref:
         description: KomgaJS branch or commit holding the fixtures
         type: string
-        default: unit-tests
+        default: main
 
 jobs:
   oracles:
@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: Smeagolworms4/komga-js
-          ref: ${{ inputs.komga_js_ref || 'unit-tests' }}
+          ref: ${{ inputs.komga_js_ref || 'main' }}
           path: komga-js
           sparse-checkout: test/unit/fixtures
 
