@@ -22,6 +22,8 @@ on:
       - '!komga-tray/src/main/resources/org/gotson/komga/*'
     branches-ignore:
       - 'dependabot/**'
+      # KomgaJS oracle branch: only the oracle tests run (oracles.yml)
+      - 'unit-oracles'
   workflow_dispatch:
 
 jobs:

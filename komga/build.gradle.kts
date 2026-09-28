@@ -169,6 +169,17 @@ tasks {
     useJUnitPlatform()
     systemProperty("spring.profiles.active", "test")
     maxHeapSize = "1G"
+
+    // KomgaJS oracle fixtures (org.gotson.komga.oracle): ./gradlew :komga:test -PoracleOut=<dir> --tests 'org.gotson.komga.oracle.*'
+    // Fixed time zone and locale so that the fixtures are reproducible (KomgaJS runs its unit tests with the same TZ).
+    (project.findProperty("oracleOut") as String?)?.let {
+      systemProperty("oracle.out", it)
+      systemProperty("user.timezone", "Europe/Paris")
+      systemProperty("user.language", "en")
+      systemProperty("user.country", "US")
+      systemProperty("java.io.tmpdir", layout.buildDirectory.dir("tmp/oracle").get().asFile.also { d -> d.mkdirs() }.absolutePath)
+      inputs.property("oracleOut", it)
+    }
   }
 
   withType<Jar> {
