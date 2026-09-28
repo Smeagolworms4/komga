@@ -59,6 +59,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.jdbc.datasource.SingleConnectionDataSource
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 import org.sqlite.SQLiteDataSource
+import java.sql.Connection
 import javax.sql.DataSource
 
 /**
@@ -104,14 +105,8 @@ class OracleDb : AutoCloseable {
         .dataSource(it)
         .locations("classpath:db/migration/sqlite")
         .mixed(true)
-        .placeholders(
-          mapOf(
-            "library-file-hashing" to "true",
-            "library-scan-startup" to "false",
-            "delete-empty-collections" to "true",
-            "delete-empty-read-lists" to "true",
-          ),
-        ).load()
+        .placeholders(placeholders)
+        .load()
         .migrate()
     }
 
@@ -190,14 +185,59 @@ class OracleDb : AutoCloseable {
   val tasksDao by lazy { TasksDao(tasksDsl, tasksDsl, properties.tasksDb.batchChunkSize, mapper) }
 
   /** Rows of a raw SQL query on the main database (JDBC getObject values: String, Int/Long, Double, ByteArray, null) */
-  fun rawQuery(sql: String): List<List<Any?>> =
-    dataSource.connection.createStatement().use { st ->
-      st.executeQuery(sql).use { rs ->
-        buildList {
-          while (rs.next()) add((1..rs.metaData.columnCount).map { rs.getObject(it) })
+  fun rawQuery(sql: String): List<List<Any?>> = query(dataSource.connection, sql)
+
+  companion object {
+    private val placeholders =
+      mapOf(
+        "library-file-hashing" to "true",
+        "library-scan-startup" to "false",
+        "delete-empty-collections" to "true",
+        "delete-empty-read-lists" to "true",
+      )
+
+    /** A new in-memory main database (SqliteUdfDataSource), migrated up to and including version [target] */
+    fun mainConnectionAt(target: String): Connection {
+      val ds =
+        SqliteUdfDataSource().run {
+          url = "jdbc:sqlite::memory:"
+          setEnforceForeignKeys(true)
+          setGetGeneratedKeys(false)
+          SingleConnectionDataSource(connection, true)
+        }
+      Flyway
+        .configure()
+        .dataSource(ds)
+        .locations("classpath:db/migration/sqlite")
+        .mixed(true)
+        .placeholders(placeholders)
+        .target(target)
+        .load()
+        .migrate()
+      return ds.connection
+    }
+
+    /** Rows of a raw SQL query (JDBC getObject values: String, Int/Long, Double, ByteArray, null) */
+    fun query(
+      connection: Connection,
+      sql: String,
+    ): List<List<Any?>> =
+      connection.createStatement().use { st ->
+        st.executeQuery(sql).use { rs ->
+          buildList {
+            while (rs.next()) add((1..rs.metaData.columnCount).map { rs.getObject(it) })
+          }
         }
       }
+
+    /** Executes SQL statements one by one */
+    fun exec(
+      connection: Connection,
+      vararg statements: String,
+    ) {
+      connection.createStatement().use { st -> statements.forEach { st.executeUpdate(it) } }
     }
+  }
 
   override fun close() {
     dataSource.destroy()
