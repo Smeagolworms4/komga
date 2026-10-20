@@ -1,16 +1,14 @@
-package org.gotson.komga.oracle.infrastructure.security.session
+package org.gotson.komga.oracle.infrastructure.session
 
 import com.github.gotson.spring.session.caffeine.CaffeineIndexedSessionRepository
-import org.gotson.komga.infrastructure.security.session.SessionConfiguration
+import org.gotson.komga.infrastructure.session.SessionConfiguration
 import org.gotson.komga.oracle.OracleTest
 import org.gotson.komga.oracle.WebOracle
-import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.session.FindByIndexNameSessionRepository
 import org.springframework.session.Session
 import org.springframework.session.web.http.CookieSerializer
-import java.time.Duration
 
 class SessionConfigurationOracleTest : OracleTest() {
   private val config = SessionConfiguration()
@@ -22,16 +20,6 @@ class SessionConfigurationOracleTest : OracleTest() {
     val response = WebOracle.response()
     serializer.writeCookieValue(CookieSerializer.CookieValue(WebOracle.request(uri = "/api/v1/users/me"), response, value))
     return WebOracle.describeResponse(response)
-  }
-
-  private fun repository(timeout: Duration?): Any? {
-    val caffeine = CaffeineIndexedSessionRepository()
-    @Suppress("UNCHECKED_CAST")
-    val repo = caffeine as FindByIndexNameSessionRepository<Session>
-    val serverProperties = ServerProperties()
-    if (timeout != null) serverProperties.servlet.session.timeout = timeout
-    config.customizeSessionRepository(serverProperties).customize(caffeine)
-    return repo.createSession().maxInactiveInterval.seconds
   }
 
   override fun cases() {
@@ -52,12 +40,6 @@ class SessionConfigurationOracleTest : OracleTest() {
       case("class") { resolver::class.java.simpleName }
       case("header") { resolver.resolveSessionIds(WebOracle.request(headers = listOf("X-Auth-Token" to "abc"))) }
       case("cookie") { resolver.resolveSessionIds(WebOracle.request(headers = listOf("Cookie" to "KOMGA-SESSION=c2Vzc2lvbi0x"))) }
-    }
-    func("customizeSessionRepository") {
-      case("default timeout") { repository(null) }
-      case("1 day") { repository(Duration.ofDays(1)) }
-      case("90 seconds") { repository(Duration.ofSeconds(90)) }
-      case("sub-second") { repository(Duration.ofMillis(1500)) }
     }
     func("sessionRegistry") {
       val caffeine = CaffeineIndexedSessionRepository().apply { init() }

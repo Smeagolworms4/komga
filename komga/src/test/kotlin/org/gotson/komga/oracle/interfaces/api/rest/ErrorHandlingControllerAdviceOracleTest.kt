@@ -3,7 +3,6 @@ package org.gotson.komga.oracle.interfaces.api.rest
 import jakarta.validation.ConstraintViolationException
 import jakarta.validation.Validation
 import jakarta.validation.constraints.NotBlank
-import org.gotson.komga.domain.model.EntityNotFoundException
 import org.gotson.komga.interfaces.api.rest.ErrorHandlingControllerAdvice
 import org.gotson.komga.interfaces.api.rest.dto.PasswordUpdateDto
 import org.gotson.komga.oracle.OracleTest
@@ -20,7 +19,7 @@ class ErrorHandlingControllerAdviceOracleTest : OracleTest() {
   private fun notValid(vararg errors: Pair<String, String?>): MethodArgumentNotValidException {
     val result = BeanPropertyBindingResult(PasswordUpdateDto("x"), "passwordUpdateDto")
     errors.forEach { (f, m) -> result.addError(FieldError("passwordUpdateDto", f, "rejected", false, null, null, m)) }
-    val method = ErrorHandlingControllerAdvice::class.java.getMethod("handleEntityNotFound")
+    val method = ErrorHandlingControllerAdvice::class.java.getMethod("handleMaxUploadSizeExceededException", MaxUploadSizeExceededException::class.java)
     return MethodArgumentNotValidException(MethodParameter(method, -1), result)
   }
 
@@ -34,9 +33,6 @@ class ErrorHandlingControllerAdviceOracleTest : OracleTest() {
     func("onMethodArgumentNotValidException") {
       case("no error") { advice.onMethodArgumentNotValidException(notValid()) }
       case("errors in order") { advice.onMethodArgumentNotValidException(notValid("password" to "must not be blank", "other" to null)) }
-    }
-    func("handleEntityNotFound") {
-      case("unit") { advice.handleEntityNotFound() }
     }
     func("handleMaxUploadSizeExceededException") {
       case("known size") {

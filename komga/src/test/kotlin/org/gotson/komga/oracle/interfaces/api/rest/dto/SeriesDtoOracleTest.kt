@@ -1,5 +1,6 @@
 package org.gotson.komga.oracle.interfaces.api.rest.dto
 
+import org.gotson.komga.interfaces.api.rest.dto.NotableEntityDto
 import org.gotson.komga.interfaces.api.rest.dto.AlternateTitleDto
 import org.gotson.komga.interfaces.api.rest.dto.AuthorDto
 import org.gotson.komga.interfaces.api.rest.dto.BookMetadataAggregationDto
@@ -33,7 +34,7 @@ class SeriesDtoOracleTest : OracleTest() {
           16, false, "en", false, setOf("g"), false, setOf("t"), false, 10, false, setOf("s"), false,
           listOf(WebLinkDto("l", "https://l")), false, listOf(AlternateTitleDto("en", "Alt")), false, d, d,
         ),
-      booksMetadata = BookMetadataAggregationDto(listOf(AuthorDto("a", "writer")), setOf("t"), LocalDate.of(2020, 1, 1), "s", "1", d, d),
+      booksMetadata = BookMetadataAggregationDto(listOf(AuthorDto("a", "writer")), listOf(NotableEntityDto("team", "X-Men")), setOf("t"), LocalDate.of(2020, 1, 1), "s", "1", d, d),
       deleted = false,
       oneshot = true,
     )

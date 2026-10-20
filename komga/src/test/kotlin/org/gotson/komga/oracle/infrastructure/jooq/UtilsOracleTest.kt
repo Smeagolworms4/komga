@@ -6,8 +6,6 @@ import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.EpubTocEntry
 import org.gotson.komga.domain.model.MediaExtensionEpub
 import org.gotson.komga.domain.model.R2Locator
-import org.gotson.komga.infrastructure.jooq.UnpagedSorted
-import org.gotson.komga.infrastructure.jooq.buildPage
 import org.gotson.komga.infrastructure.jooq.csAlias
 import org.gotson.komga.infrastructure.jooq.deserializeJsonGz
 import org.gotson.komga.infrastructure.jooq.deserializeMediaExtension
@@ -33,9 +31,6 @@ import org.jooq.Field
 import org.jooq.OrderField
 import org.jooq.SortField
 import org.jooq.impl.DSL
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 
 class UtilsOracleTest : OracleTest() {
@@ -68,8 +63,6 @@ class UtilsOracleTest : OracleTest() {
       .orderBy(order)
 
   private val sorts: Map<String, Field<out Any>> = mapOf("title" to sm.TITLE, "age" to sm.AGE_RATING, "id" to sm.SERIES_ID)
-
-  private fun page(p: Page<*>) = listOf(p, p.totalPages, p.sort.toString(), p.pageable.isPaged, p.hasNext())
 
   private val locator =
     R2Locator(
@@ -396,18 +389,5 @@ class UtilsOracleTest : OracleTest() {
       }
     }
 
-    func("buildPage") {
-      case("paged, sort from pageable") { page(buildPage(listOf("a", "b"), PageRequest.of(1, 2, Sort.by("title")), 10, null)) }
-      case("paged, explicit sort") { page(buildPage(listOf("a"), PageRequest.of(0, 5, Sort.by("title")), 1, Sort.by(Sort.Order.desc("age")))) }
-      case("paged, count smaller than page") { page(buildPage(listOf("a", "b", "c"), PageRequest.of(2, 10), 5, null)) }
-      case("paged, empty content") { page(buildPage(emptyList<String>(), PageRequest.of(3, 10), 5, null)) }
-      case("unpaged, small count") { page(buildPage(listOf("a"), Pageable.unpaged(), 5, null)) }
-      case("unpaged, large count") { page(buildPage(List(30) { "x$it" }, Pageable.unpaged(), 30, Sort.by("id"))) }
-      case("unpaged, count 20") { page(buildPage(emptyList<String>(), Pageable.unpaged(), 20, null)) }
-      case("unpaged, zero count") { page(buildPage(emptyList<String>(), Pageable.unpaged(), 0, null)) }
-      case("unpaged sorted") { page(buildPage(listOf(1, 2, 3), UnpagedSorted(Sort.by(Sort.Order.asc("seriesId"), Sort.Order.desc("number"))), 3, null)) }
-      case("unpaged sorted, explicit sort") { page(buildPage(listOf(1), UnpagedSorted(Sort.by("a")), 1, Sort.unsorted())) }
-      case("unpaged sorted, large count") { page(buildPage(listOf(1), UnpagedSorted(Sort.unsorted()), 25, null)) }
-    }
   }
 }

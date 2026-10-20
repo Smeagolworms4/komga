@@ -1,5 +1,6 @@
 package org.gotson.komga.oracle.domain.model
 
+import org.gotson.komga.domain.model.NotableEntity
 import org.gotson.komga.domain.model.Author
 import org.gotson.komga.domain.model.BookMetadata
 import org.gotson.komga.domain.model.WebLink
@@ -19,9 +20,11 @@ class BookMetadataOracleTest : OracleTest() {
       1.5f,
       LocalDate.of(2021, 2, 28),
       listOf(Author(" John ", "WRITER"), Author("Jane", "penciller")),
+      listOf(NotableEntity(" TEAM ", " X-Men "), NotableEntity("location", "Gotham")),
       setOf("TAG", "tag ", " ", "Other"),
       "9781234567897",
       listOf(WebLink("Site", URI("https://example.org/a?b=c"))),
+      true,
       true,
       true,
       true,

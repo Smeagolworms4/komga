@@ -2,6 +2,7 @@ package org.gotson.komga.oracle.infrastructure.jooq.main
 
 import org.gotson.komga.domain.model.Author
 import org.gotson.komga.domain.model.BookMetadata
+import org.gotson.komga.domain.model.NotableEntity
 import org.gotson.komga.domain.model.WebLink
 import org.gotson.komga.oracle.OracleDb
 import org.gotson.komga.oracle.OracleTest
@@ -285,6 +286,46 @@ class BookMetadataDaoOracleTest : OracleTest() {
 
     func("count") {
       case("after deletions") { dao.count() }
+    }
+
+    func("insertNotableEntities") {
+      case("insert") {
+        dao.insert(
+          meta("B2").copy(
+            notableEntities = listOf(NotableEntity(" TEAM ", "X-Men "), NotableEntity("location", "Gotham"), NotableEntity("team", "X-Men"), NotableEntity("character", "Émile")),
+            notableEntitiesLock = true,
+          ),
+        )
+        stable(dao.findById("B2"))
+      }
+      case("several") {
+        dao.insert(listOf(meta("B3").copy(notableEntities = listOf(NotableEntity("character", "Joker"))), meta("M0001"), meta("M0002").copy(notableEntities = listOf(NotableEntity("team", "A")))))
+        dao.findAllByIds(listOf("B2", "B3", "M0001", "M0002")).map { listOf(it.bookId, it.notableEntities, it.notableEntitiesLock) }
+      }
+      case("rows") { db.rawQuery("select * from BOOK_METADATA_NOTABLE_ENTITIES order by BOOK_ID, rowid") }
+    }
+
+    func("notableEntities") {
+      case("update replaces") {
+        dao.update(dao.findById("B2").copy(notableEntities = listOf(NotableEntity("character", "Bane")), notableEntitiesLock = false))
+        dao.findById("B2").let { listOf(it.notableEntities, it.notableEntitiesLock) }
+      }
+      case("update to empty") {
+        dao.update(dao.findById("B3").copy(notableEntities = emptyList()))
+        listOf(dao.findById("B3").notableEntities, db.rawQuery("select BOOK_ID, KIND, NAME from BOOK_METADATA_NOTABLE_ENTITIES order by BOOK_ID, rowid"))
+      }
+      case("stored values are not normalized") {
+        sql(db, "insert into BOOK_METADATA_NOTABLE_ENTITIES (KIND, NAME, BOOK_ID) values (' TEAM ', ' Spaced ', 'B2')")
+        dao.findById("B2").notableEntities.map { listOf(it.kind, it.name) }
+      }
+      case("delete one") {
+        dao.delete("B2")
+        db.rawQuery("select BOOK_ID, KIND, NAME from BOOK_METADATA_NOTABLE_ENTITIES order by BOOK_ID, rowid")
+      }
+      case("delete several") {
+        dao.delete(listOf("M0001", "M0002", "B3"))
+        db.rawQuery("select count(*) from BOOK_METADATA_NOTABLE_ENTITIES")
+      }
     }
   }
 }

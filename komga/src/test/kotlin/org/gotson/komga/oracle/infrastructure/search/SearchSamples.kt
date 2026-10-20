@@ -87,6 +87,8 @@ object SearchSamples {
             isbnLock = false,
             links = emptyList(),
             linksLock = false,
+            notableEntities = emptyList(),
+            notableEntitiesLock = false,
             created = date,
             lastModified = date,
           ),
@@ -147,6 +149,7 @@ object SearchSamples {
         booksMetadata =
           BookMetadataAggregationDto(
             authors = it["authors"].authors(),
+            notableEntities = emptyList(),
             tags = it["booksTags"].strings().toSet(),
             releaseDate = it["releaseDate"].textOrNull()?.let { d -> LocalDate.parse(d) },
             summary = "",

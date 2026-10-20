@@ -1,6 +1,6 @@
-package org.gotson.komga.oracle.infrastructure.security.session
+package org.gotson.komga.oracle.infrastructure.session
 
-import org.gotson.komga.infrastructure.security.session.SmartHttpSessionIdResolver
+import org.gotson.komga.infrastructure.session.SmartHttpSessionIdResolver
 import org.gotson.komga.oracle.OracleTest
 import org.gotson.komga.oracle.WebOracle
 import org.springframework.session.web.http.DefaultCookieSerializer

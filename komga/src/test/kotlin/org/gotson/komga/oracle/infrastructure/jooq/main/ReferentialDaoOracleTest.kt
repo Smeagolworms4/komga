@@ -3,6 +3,7 @@ package org.gotson.komga.oracle.infrastructure.jooq.main
 import org.gotson.komga.domain.model.FilterBy
 import org.gotson.komga.domain.model.FilterByEntity
 import org.gotson.komga.domain.model.FilterTags
+import org.gotson.komga.domain.model.NotableEntity
 import org.gotson.komga.domain.model.SearchContext
 import org.gotson.komga.oracle.OracleDb
 import org.gotson.komga.oracle.OracleTest
@@ -264,6 +265,40 @@ class ReferentialDaoOracleTest : OracleTest() {
 
     func("findSharingLabels") {
       generic("AD") { c, s, f, p -> dao.findSharingLabels(c, s, f, p) }
+    }
+
+    func("findNotableEntities") {
+      case("seed notable entities") {
+        listOf(
+          "B1" to listOf(NotableEntity("team", "Justice League"), NotableEntity("location", "Gotham")),
+          "B3" to listOf(NotableEntity("character", "Joker"), NotableEntity("location", "Gotham"), NotableEntity("team", "justice league")),
+          "B6" to listOf(NotableEntity("character", "Naruto"), NotableEntity("team", "Team 7"), NotableEntity("location", "Konoha")),
+          "B10" to listOf(NotableEntity("character", "Æon Flux"), NotableEntity("location", "Monica")),
+          "B8" to listOf(NotableEntity("character", "Deleted Guy")),
+        ).forEach { (id, ne) -> db.bookMetadataDao.update(db.bookMetadataDao.findById(id).copy(notableEntities = ne)) }
+        dao.findNotableEntities(contexts[0].second, null, null, null, Pageable.unpaged())
+      }
+      generic("go") { c, s, f, p -> dao.findNotableEntities(c, s, null, f, p) }
+      case("kind") { dao.findNotableEntities(contexts[0].second, null, "location", null, Pageable.unpaged()) }
+      case("kind and search") { dao.findNotableEntities(contexts[0].second, "o", "character", filterBys[3].second, Pageable.unpaged()) }
+      case("unknown kind") { dao.findNotableEntities(contexts[0].second, null, "nope", null, PageRequest.of(0, 5)) }
+      case("accent insensitive search") { dao.findNotableEntities(contexts[0].second, "aeon", null, null, Pageable.unpaged()) }
+      case("first page") { dao.findNotableEntities(contexts[0].second, null, null, null, PageRequest.of(0, 3)) }
+    }
+
+    func("findNotableEntitiesKinds") {
+      generic(null) { c, _, f, p -> dao.findNotableEntitiesKinds(c, f, p) }
+      case("first page") { dao.findNotableEntitiesKinds(contexts[0].second, null, PageRequest.of(0, 1)) }
+    }
+
+    func("findNotableEntitiesNames") {
+      generic("a") { c, s, f, p -> dao.findNotableEntitiesNames(c, s, null, f, p) }
+      case("kind") { dao.findNotableEntitiesNames(contexts[0].second, null, "team", null, Pageable.unpaged()) }
+      case("kind paged") { dao.findNotableEntitiesNames(contexts[0].second, null, "location", null, PageRequest.of(0, 2)) }
+    }
+
+    func("toDomain@885") {
+      case("notable entity") { dao.findNotableEntities(contexts[0].second, "Naruto", null, null, Pageable.unpaged()) }
     }
 
     func("toDomain@838") {

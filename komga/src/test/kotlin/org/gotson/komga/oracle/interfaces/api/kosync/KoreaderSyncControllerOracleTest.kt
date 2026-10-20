@@ -1,5 +1,6 @@
 package org.gotson.komga.oracle.interfaces.api.kosync
 
+import org.gotson.komga.infrastructure.koreader.KoreaderProgressConverter
 import org.gotson.komga.domain.model.MediaExtensionEpub
 import org.gotson.komga.domain.model.R2Locator
 import org.gotson.komga.domain.model.ReadProgress
@@ -16,7 +17,7 @@ import java.time.LocalDateTime
 class KoreaderSyncControllerOracleTest : OracleTest() {
   private val db = OracleDb()
   private val services = InterfacesServices(db)
-  private val controller by lazy { KoreaderSyncController(db.bookDao, db.mediaDao, db.readProgressDao, services.bookLifecycle) }
+  private val controller by lazy { KoreaderSyncController(db.bookDao, db.mediaDao, db.readProgressDao, services.bookLifecycle, KoreaderProgressConverter(db.mediaDao)) }
   private val admin = KomgaPrincipal(InterfacesData.admin)
   private val limited = KomgaPrincipal(InterfacesData.limited)
   private val date = LocalDateTime.of(2020, 1, 2, 3, 4, 5)

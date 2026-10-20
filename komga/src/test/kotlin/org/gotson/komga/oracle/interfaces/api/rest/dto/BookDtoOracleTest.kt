@@ -1,5 +1,6 @@
 package org.gotson.komga.oracle.interfaces.api.rest.dto
 
+import org.gotson.komga.interfaces.api.rest.dto.NotableEntityDto
 import org.gotson.komga.interfaces.api.rest.dto.AuthorDto
 import org.gotson.komga.interfaces.api.rest.dto.BookDto
 import org.gotson.komga.interfaces.api.rest.dto.BookMetadataDto
@@ -34,7 +35,7 @@ class BookDtoOracleTest : OracleTest() {
     metadata =
       BookMetadataDto(
         "Title", false, "Summary", true, "1", false, 1.5f, false, LocalDate.of(2020, 1, 1), false,
-        listOf(AuthorDto("a", "writer")), false, setOf("t2", "t1"), false, "9781234567897", false,
+        listOf(AuthorDto("a", "writer")), false, listOf(NotableEntityDto("team", "X-Men")), false, setOf("t2", "t1"), false, "9781234567897", false,
         listOf(WebLinkDto("l", "https://l")), false, d, d,
       ),
     readProgress = ReadProgressDto(3, false, d, d, d, "dev", "Device"),

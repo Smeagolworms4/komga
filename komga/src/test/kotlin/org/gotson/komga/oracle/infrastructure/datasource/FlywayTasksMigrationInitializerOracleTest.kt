@@ -1,12 +1,12 @@
 package org.gotson.komga.oracle.infrastructure.datasource
 
-import org.gotson.komga.infrastructure.datasource.FlywaySecondaryMigrationInitializer
+import org.gotson.komga.infrastructure.datasource.FlywayTasksMigrationInitializer
 import org.gotson.komga.oracle.OracleDb
 import org.gotson.komga.oracle.OracleTest
 import org.springframework.jdbc.datasource.SingleConnectionDataSource
 import org.sqlite.SQLiteDataSource
 
-class FlywaySecondaryMigrationInitializerOracleTest : OracleTest() {
+class FlywayTasksMigrationInitializerOracleTest : OracleTest() {
   private val dataSource =
     SingleConnectionDataSource(SQLiteDataSource().apply { url = "jdbc:sqlite::memory:" }.connection, true)
 
@@ -18,13 +18,13 @@ class FlywaySecondaryMigrationInitializerOracleTest : OracleTest() {
     func("afterPropertiesSet") {
       case("empty database") { q("select count(*) from sqlite_master") }
       case("migrates the tasks database") {
-        FlywaySecondaryMigrationInitializer(dataSource).afterPropertiesSet()
+        FlywayTasksMigrationInitializer(dataSource).afterPropertiesSet()
         q("select type, name, tbl_name from sqlite_master where name not like 'sqlite_%' order by type, name")
       }
       case("schema history") { history() }
       case("task table columns") { q("select name, type, \"notnull\", dflt_value, pk from pragma_table_info('TASK') order by cid") }
       case("idempotent") {
-        FlywaySecondaryMigrationInitializer(dataSource).afterPropertiesSet()
+        FlywayTasksMigrationInitializer(dataSource).afterPropertiesSet()
         history()
       }
       case("task table usable") {

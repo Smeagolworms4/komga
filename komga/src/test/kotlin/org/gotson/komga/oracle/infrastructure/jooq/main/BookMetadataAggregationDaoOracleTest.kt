@@ -2,6 +2,7 @@ package org.gotson.komga.oracle.infrastructure.jooq.main
 
 import org.gotson.komga.domain.model.Author
 import org.gotson.komga.domain.model.BookMetadataAggregation
+import org.gotson.komga.domain.model.NotableEntity
 import org.gotson.komga.oracle.OracleDb
 import org.gotson.komga.oracle.OracleTest
 import org.gotson.komga.oracle.infrastructure.jooq.main.DaoSeed.library
@@ -179,6 +180,42 @@ class BookMetadataAggregationDaoOracleTest : OracleTest() {
 
     func("count") {
       case("after deletions") { dao.count() }
+    }
+
+    func("insertNotableEntities") {
+      case("insert") {
+        dao.insert(
+          BookMetadataAggregation(
+            notableEntities = listOf(NotableEntity(" TEAM ", "X-Men "), NotableEntity("location", "Gotham"), NotableEntity("team", "X-Men"), NotableEntity("", "")),
+            seriesId = "S5",
+          ),
+        )
+        stable(dao.findById("S5"))
+      }
+      case("more than batch size") {
+        dao.insert(BookMetadataAggregation(notableEntities = (1..1100).map { NotableEntity("kind ${it % 3}", "name $it") }, seriesId = "S6"))
+        dao.findById("S6").notableEntities.let { listOf(it.size, it.first().toString(), it.last().toString()) }
+      }
+      case("rows") { db.rawQuery("select SERIES_ID, KIND, NAME from BOOK_METADATA_AGGREGATION_NOTABLE_ENTITIES where SERIES_ID = 'S5' order by rowid") }
+    }
+
+    func("notableEntities") {
+      case("update replaces") {
+        dao.update(dao.findById("S5").copy(notableEntities = listOf(NotableEntity("character", "Bane"))))
+        dao.findById("S5").notableEntities
+      }
+      case("stored values are not normalized") {
+        sql(db, "insert into BOOK_METADATA_AGGREGATION_NOTABLE_ENTITIES (KIND, NAME, SERIES_ID) values (' TEAM ', ' Spaced ', 'S5')")
+        dao.findById("S5").notableEntities.map { listOf(it.kind, it.name) }
+      }
+      case("delete one") {
+        dao.delete("S5")
+        db.rawQuery("select SERIES_ID, count(*) from BOOK_METADATA_AGGREGATION_NOTABLE_ENTITIES group by SERIES_ID order by SERIES_ID")
+      }
+      case("delete several") {
+        dao.delete(listOf("S6", "S2"))
+        db.rawQuery("select count(*) from BOOK_METADATA_AGGREGATION_NOTABLE_ENTITIES")
+      }
     }
   }
 }

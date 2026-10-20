@@ -287,12 +287,12 @@ object NzDaoSeed {
 
   val aggregations =
     listOf(
-      BookMetadataAggregation(listOf(Author("Frank Miller", "writer"), Author("Alan Moore", "writer"), Author("David Mazzucchelli", "penciller")), setOf("classic", "joker"), LocalDate.of(1987, 2, 1), "Batman summary", "1", "S1"),
-      BookMetadataAggregation(listOf(Author("Émile Zola", "writer")), emptySet(), LocalDate.of(2001, 1, 1), "", "", "S2"),
-      BookMetadataAggregation(listOf(Author("Masashi Kishimoto", "writer")), setOf("special"), LocalDate.of(1999, 9, 21), "", "", "S3"),
-      BookMetadataAggregation(emptyList(), emptySet(), LocalDate.of(1950, 6, 1), "", "", "S4"),
-      BookMetadataAggregation(listOf(Author("Peter Chung", "writer")), emptySet(), LocalDate.of(1995, 1, 1), "", "", "S5"),
-      BookMetadataAggregation(emptyList(), setOf("science"), LocalDate.of(2010, 10, 10), "", "", "S6"),
+      BookMetadataAggregation(listOf(Author("Frank Miller", "writer"), Author("Alan Moore", "writer"), Author("David Mazzucchelli", "penciller")), emptyList(), setOf("classic", "joker"), LocalDate.of(1987, 2, 1), "Batman summary", "1", "S1"),
+      BookMetadataAggregation(listOf(Author("Émile Zola", "writer")), emptyList(), emptySet(), LocalDate.of(2001, 1, 1), "", "", "S2"),
+      BookMetadataAggregation(listOf(Author("Masashi Kishimoto", "writer")), emptyList(), setOf("special"), LocalDate.of(1999, 9, 21), "", "", "S3"),
+      BookMetadataAggregation(emptyList(), emptyList(), emptySet(), LocalDate.of(1950, 6, 1), "", "", "S4"),
+      BookMetadataAggregation(listOf(Author("Peter Chung", "writer")), emptyList(), emptySet(), LocalDate.of(1995, 1, 1), "", "", "S5"),
+      BookMetadataAggregation(emptyList(), emptyList(), setOf("science"), LocalDate.of(2010, 10, 10), "", "", "S6"),
     )
 
   val readProgress =

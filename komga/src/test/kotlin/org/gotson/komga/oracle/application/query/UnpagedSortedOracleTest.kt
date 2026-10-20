@@ -1,6 +1,6 @@
-package org.gotson.komga.oracle.infrastructure.jooq
+package org.gotson.komga.oracle.application.query
 
-import org.gotson.komga.infrastructure.jooq.UnpagedSorted
+import org.gotson.komga.application.query.UnpagedSorted
 import org.gotson.komga.oracle.OracleTest
 import org.springframework.data.domain.Sort
 

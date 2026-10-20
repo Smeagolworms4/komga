@@ -1,6 +1,6 @@
-package org.gotson.komga.oracle.infrastructure.security.session
+package org.gotson.komga.oracle.infrastructure.session
 
-import org.gotson.komga.infrastructure.security.session.SessionListener
+import org.gotson.komga.infrastructure.session.SessionListener
 import org.gotson.komga.oracle.OracleTest
 import org.springframework.session.MapSession
 import org.springframework.session.events.SessionCreatedEvent

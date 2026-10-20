@@ -1,6 +1,6 @@
-package org.gotson.komga.oracle.infrastructure.hash
+package org.gotson.komga.oracle.infrastructure.koreader
 
-import org.gotson.komga.infrastructure.hash.KoreaderHasher
+import org.gotson.komga.infrastructure.koreader.KoreaderHasher
 import org.gotson.komga.oracle.OracleTest
 import kotlin.io.path.writeBytes
 
